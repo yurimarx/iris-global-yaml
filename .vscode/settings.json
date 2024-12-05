@@ -1,0 +1,21 @@
+{
+    "files.associations": {
+
+        "iris.script": "objectscript"
+      },
+    "objectscript.conn" :{
+      "ns": "USER",
+      "username": "_SYSTEM",
+      "password": "SYS",
+      "docker-compose": {
+        "service": "iris",
+        "internalPort": 52773
+      },
+      "active": true,
+      "links": {
+        "Swagger": "${serverUrl}/swagger-ui/index.html"
+      }
+    }
+
+
+}
