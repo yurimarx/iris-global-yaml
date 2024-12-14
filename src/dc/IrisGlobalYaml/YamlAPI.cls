@@ -145,6 +145,8 @@ ClassMethod SetGlobalWithYaml(namespace As %String, globalname As %String) As %S
 {
 	#dim tSC As %Status = $$$OK
     
+    Write "# IRIS-Global-YAML", !, " will be implemented ASAP"
+        
     Quit tSC
 }
 
@@ -153,9 +155,15 @@ ClassMethod DeleteGlobal(namespace As %String, globalname As %String) As %Status
 {
 	#dim tSC As %Status = $$$OK
     
-    Set $NAMESPACE = namespace
+    Try {
+        
+        Set $NAMESPACE = namespace
 
-    Kill @globalname
+        Kill @globalname
+        
+    } Catch ex {
+        Set tSC=ex.AsStatus()
+    }
 
     Quit tSC
 }
@@ -165,13 +173,18 @@ ClassMethod SetGlobalWithValue(namespace As %String, globalname As %String) As %
 {
 	#dim tSC As %Status = $$$OK
     
-    Set $NAMESPACE = namespace
+    Try {
+        Set $NAMESPACE = namespace
 
-    If $EXTRACT(globalname,1) '= "^" {
-        Set globalname = "^"_globalname
+        If $EXTRACT(globalname,1) '= "^" {
+            Set globalname = "^"_globalname
+        }
+
+        set @globalname = %request.Data("globalvalue", 1)
+        
+    } Catch ex {
+        Set tSC=ex.AsStatus()
     }
-
-    set @globalname = %request.Data("globalvalue", 1)
 
     Quit tSC
 }
