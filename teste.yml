@@ -1,0 +1,6 @@
+# IRIS-Global-YAML
+USER:
+ ^teste:
+  - ^teste(1): sss
+  - ^teste(1,1): vvv
+  - ^teste(2,1): ggg

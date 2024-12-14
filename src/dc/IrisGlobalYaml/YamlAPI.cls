@@ -9,14 +9,10 @@ XData UrlMap [ XMLNamespace = "http://www.intersystems.com/urlmap" ]
 {
 <Routes>
 
-<!-- Server Info -->
-<Route Url="/" Method="GET" Call="GetInfo" Cors="true"/>
-<!-- Swagger specs -->
-<Route Url="/_spec" Method="GET" Call="SwaggerSpec" />
 
 <!-- Get all namespace globals -->
 <Route Url="/globals/:namespace" Method="GET" Call="GetNamespaceGlobals"/>
-<!-- GET method to return JSON for a given person id-->
+<!-- GET method to return global from globalname -->
 <Route Url="/globals/:namespace/:globalname" Method="GET" Call="GetGlobalByName"/>
 <!-- Set a global with values into a yaml -->
 <Route Url="/globals/:namespace/:globalname" Method="POST" Call="SetGlobalWithYaml"/>
@@ -24,6 +20,15 @@ XData UrlMap [ XMLNamespace = "http://www.intersystems.com/urlmap" ]
 <Route Url="/globals/:namespace/:globalname" Method="DELETE" Call="DeleteGlobal"/>
 <!-- Set a global with simple value -->
 <Route Url="/globals/:namespace/:globalname" Method="PUT" Call="SetGlobalWithValue"/>
+<!-- Get a global yaml content -->
+<Route Url="/globals/yaml/:namespace/:globalname" Method="GET" Call="GetGlobalYamlContent"/>
+
+
+<!-- Server Info -->
+<Route Url="/" Method="GET" Call="GetInfo" Cors="true"/>
+<!-- Swagger specs -->
+<Route Url="/_spec" Method="GET" Call="SwaggerSpec" />
+
 
 </Routes>
 }
@@ -44,20 +49,70 @@ ClassMethod GetNamespaceGlobals(namespace As %String) As %Status
 
     #dim tSC As %Status = $$$OK
 
-    Set $NAMESPACE = namespace
+    Try {
+        
+        Set $NAMESPACE = namespace
 
-    Set %response.ContentType = ..#YAMLCONTENTTYPE
-    
-    Write namespace_":",!
+        Set %response.ContentType = ..#YAMLCONTENTTYPE
+        
+        Write "# IRIS-Global-YAML", !
+        
+        Write namespace_":", !
 
-    SET NAME=""
-    FOR I=1:1 {
-        SET NAME=$ORDER(^$GLOBAL(NAME))
-        If (NAME '= "") {
-            WRITE " ",NAME_": ", $GET(@NAME), !
+        SET NAME=""
+        FOR I=1:1 {
+            SET NAME=$ORDER(^$GLOBAL(NAME))
+            If (NAME '= "") {
+                WRITE " ",NAME_": ", $GET(@NAME), !
+            }
+            QUIT:NAME=""
+            SET GLOBAL(I)=NAME
         }
-        QUIT:NAME=""
-        SET GLOBAL(I)=NAME
+
+    } Catch ex {
+        Set %response.Status = "500"
+        Set tSC=ex.AsStatus()
+    }
+    
+    Quit tSC
+}
+
+/// Return a global content as yaml
+ClassMethod GetGlobalYamlContent(namespace As %String, globalname As %String) As %Status
+{
+    #dim tSC As %Status = $$$OK 
+    
+    Try {
+        
+        Set $NAMESPACE = namespace
+
+        Set %response.ContentType = ..#YAMLCONTENTTYPE
+
+        Write "# IRIS-Global-YAML", !
+
+        Write namespace_":", !
+
+        Set list = ..GetSubscriptsList(globalname)
+
+        Set iter = list.%GetIterator()
+
+        Set wroteSubscripts = 0
+        
+        While iter.%GetNext(.key, .value) {
+            If $FIND(value, "(") > 0 {
+                If wroteSubscripts = 0 {
+                    Write "     subscripts:", !
+                    Set wroteSubscripts = 1
+                }
+                Write "        - ", value, ": ", $GET(@value), !
+            } Else {
+                Write " ", value, ": ", !
+                Write "     value: ", $GET(@value), !
+            }
+        }
+    }
+    Catch ex {
+        Set tSC=ex.AsStatus()
     }
     
     Quit tSC
@@ -68,13 +123,19 @@ ClassMethod GetGlobalByName(namespace As %String, globalname As %String) As %Sta
 {
 	#dim tSC As %Status = $$$OK 
     
-    Set $NAMESPACE = namespace
+    Try {
+        
+        Set $NAMESPACE = namespace
 
-    Set %response.ContentType = ..#YAMLCONTENTTYPE
-    
-    Write namespace_":",!
-    
-    Write " ", globalname, ": ", $GET(@globalname)
+        Set %response.ContentType = ..#YAMLCONTENTTYPE
+        
+        Write namespace_":",!
+        
+        Write " ", globalname, ": ", $GET(@globalname)
+    }
+    Catch ex {
+        Set tSC=ex.AsStatus()
+    }
 
     Quit tSC
 }
@@ -87,7 +148,7 @@ ClassMethod SetGlobalWithYaml(namespace As %String, globalname As %String) As %S
     Quit tSC
 }
 
-/// Update a record in dc.Sample.Person with id
+/// Delete a global
 ClassMethod DeleteGlobal(namespace As %String, globalname As %String) As %Status
 {
 	#dim tSC As %Status = $$$OK
@@ -99,7 +160,7 @@ ClassMethod DeleteGlobal(namespace As %String, globalname As %String) As %Status
     Quit tSC
 }
 
-/// Delete a record with id in dc.Sample.Person
+/// Set the global with a simple value from the parameter globalvalue
 ClassMethod SetGlobalWithValue(namespace As %String, globalname As %String) As %Status
 {
 	#dim tSC As %Status = $$$OK
@@ -115,15 +176,48 @@ ClassMethod SetGlobalWithValue(namespace As %String, globalname As %String) As %
     Quit tSC
 }
 
+/// Get swagger documentation to the this API
 ClassMethod SwaggerSpec() As %Status
 {
   Set tSC = ##class(%REST.API).GetWebRESTApplication($NAMESPACE, %request.Application, .swagger)
   Do swagger.info.%Remove("x-ISC_Namespace")
   Set swagger.basePath = "/iris-global-yaml"
-  Set swagger.info.title = "InterSystems IRIS Globals editor using YAML"
+  Set swagger.info.title = "API for the InterSystems IRIS Globals editor using YAML"
   Set swagger.info.version = "1.0.0"
   Set swagger.host = "localhost:52773"
   Return ..%ProcessResult($$$OK, swagger)
+}
+
+/// Support method to get global subscripts list
+ClassMethod GetSubscriptsList(globalname As %String) As %DynamicArray
+{
+    
+    Set list = []
+
+    Try {
+        
+        Set globalRef = globalname
+        
+        If globalRef '= "" {
+            Do list.%Push(globalRef) 
+        }
+        
+        For { 
+            Set globalRef=$QUERY(@globalRef)
+            
+            If globalRef '= "" {
+                Do list.%Push(globalRef) 
+            }
+            
+            Quit:globalRef=""
+        }   
+    
+    }
+    Catch ex {
+        Set list = []
+    }
+
+    Return list
 }
 
 }
