@@ -15,6 +15,12 @@
       "links": {
         "Swagger": "${serverUrl}/swagger-ui/index.html"
       }
+    },
+    "conf.irisGlobalEditor.serverconfig": { 
+      "host": "http://localhost:52773", 
+      "namespace": "USER", 
+      "username": "_SYSTEM", 
+      "password": "SYS" 
     }
 
 

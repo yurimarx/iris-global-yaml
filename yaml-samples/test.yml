@@ -1,0 +1,12 @@
+# IRIS-Global-YAML
+USER:
+    ^test: 
+        value: hello 
+        subscripts:
+            - ^test(1): 1
+            - ^test(1,1): 1.1
+            - ^test(1,2): 1.2 
+            - ^test(2,1): 2.1
+            - ^test(2,2): 2.2 
+            - ^test(2,3): 2.3
+            - ^test(2,4): 2.4 
