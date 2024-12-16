@@ -15,7 +15,7 @@ XData UrlMap [ XMLNamespace = "http://www.intersystems.com/urlmap" ]
 <!-- GET method to return global from globalname -->
 <Route Url="/globals/:namespace/:globalname" Method="GET" Call="GetGlobalByName"/>
 <!-- Set a global with values into a yaml -->
-<Route Url="/globals/:namespace/:globalname" Method="POST" Call="SetGlobalWithYaml"/>
+<Route Url="/globals/:namespace" Method="POST" Call="SetGlobalWithYaml"/>
 <!-- Delete a global by name -->
 <Route Url="/globals/:namespace/:globalname" Method="DELETE" Call="DeleteGlobal"/>
 <!-- Set a global with simple value -->
@@ -141,12 +141,73 @@ ClassMethod GetGlobalByName(namespace As %String, globalname As %String) As %Sta
 }
 
 /// Set globals using a yaml
-ClassMethod SetGlobalWithYaml(namespace As %String, globalname As %String) As %Status
+ClassMethod SetGlobalWithYaml(namespace As %String) As %Status
 {
-	#dim tSC As %Status = $$$OK
-    
-    Write "# IRIS-Global-YAML", !, " will be implemented ASAP"
+	Try {
+        Set source = %request.GetMimeData("file")
+        Set destination=##class(%Stream.FileBinary).%New()
+        Set destination.Filename="/tmp/"_source.FileName
+        set tSC=destination.CopyFrom(source) //reader open the file
+        set result=destination.%Save()
         
+        Set yml = ##class(%File).%New("/tmp/"_source.FileName)
+        Set tSC = yml.Open("RU")
+        Set globalname = ""
+        Set globalvalue = ""
+        Set hasSubscripts = 0
+        Set subscriptsList = []
+
+        While (yml.AtEnd = 0) {
+            Set line = yml.ReadLine(,.tSC)
+            If $FIND(line, namespace_":") > 1 {
+                set $namespace = namespace
+            }
+
+            If ($FIND(line, "    ") = 5) & ($FIND(line, "^") = 6) {
+                Set globalname = $ZSTRIP(line,"<>W")
+                Set globalname = $EXTRACT(globalname, 1, $LENGTH(globalname)-1)
+            }
+
+            If ($LENGTH(globalname) > 1) & ($FIND(line, "       value:") > 1) {
+                Set globalvalue = $PIECE(line, ":", 2)
+                Set globalvalue = $ZSTRIP(globalvalue,"<>W")
+            } 
+
+            If $FIND(line, "subscripts:") > 1 {
+                Set hasSubscripts = 1
+            }
+
+            If (hasSubscripts = 1) & ($FIND(line, "- ^") > 1) {
+                Set subscript = $EXTRACT(line, $FIND(line, "- "), $LENGTH(line))
+                Do subscriptsList.%Push(subscript)
+            }
+
+            if $$$ISERR(tSC) { 
+                do $system.Status.DisplayError(tSC) 
+            }
+        }
+
+        Set @globalname = globalvalue
+
+        Set iter = subscriptsList.%GetIterator()
+        While iter.%GetNext(.key, .value) { 
+            Set subName = $PIECE(value, ":", 1)
+            Set subValue = $PIECE(value, ":", 2)
+            Set @subName = $ZSTRIP(subValue,"<>W")
+        }
+
+        Set %response.Headers("Access-Control-Allow-Origin")="*"
+        Set %response.ContentType = ..#YAMLCONTENTTYPE
+        Set %response.Status = "200"
+        Set tSC=$$$OK
+   
+    //returns error message to the user
+    } Catch e {
+        Set tSC=e.AsStatus()
+        Set %response.Status = "500"
+        Set pOutput = tSC
+    }
+ 
     Quit tSC
 }
 

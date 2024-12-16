@@ -34,6 +34,6 @@ $ docker-compose up -d --build
 
 ## How to Work With it
 
-This API creates /iris-global-yaml REST web-application on IRIS which implements 4 types of communication: GET, POST, PUT and DELETE aka CRUD operations on Globals.
+1. Try import to your postman this file (on root folder): iris-global-yaml.postman_collection.json.
 
-Open http://[your server]:[your web port]/swagger-ui/index.html to test the REST API
+2. This API creates /iris-global-yaml REST web-application on IRIS which implements 4 types of communication: GET, POST, PUT and DELETE aka CRUD operations on Globals. Open http://[your server]:[your web port]/swagger-ui/index.html to test the REST API

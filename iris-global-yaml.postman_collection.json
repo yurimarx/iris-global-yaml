@@ -1,0 +1,209 @@
+{
+	"info": {
+		"_postman_id": "288383de-9585-4541-b729-a1181314071c",
+		"name": "iris-global-yaml",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Save Global with simple value",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "SYS",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "_SYSTEM",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/C:/Users/yurim/OneDrive/Documentos/test.yml"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:52773/iris-global-yaml/globals/USER/^bird?globalvalue=hawk",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "52773",
+					"path": [
+						"iris-global-yaml",
+						"globals",
+						"USER",
+						"^bird"
+					],
+					"query": [
+						{
+							"key": "globalvalue",
+							"value": "hawk"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "List Namespace globals",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:52773/iris-global-yaml/globals/USER",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "52773",
+					"path": [
+						"iris-global-yaml",
+						"globals",
+						"USER"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get global yaml content",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:52773/iris-global-yaml/globals/yaml/USER/^test",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "52773",
+					"path": [
+						"iris-global-yaml",
+						"globals",
+						"yaml",
+						"USER",
+						"^test"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete global",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:52773/iris-global-yaml/globals/USER/^bird",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "52773",
+					"path": [
+						"iris-global-yaml",
+						"globals",
+						"USER",
+						"^bird"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Save Global with YAML",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "SYS",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "_SYSTEM",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/C:/Users/yurim/OneDrive/Documentos/test.yml"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:52773/iris-global-yaml/globals/USER",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "52773",
+					"path": [
+						"iris-global-yaml",
+						"globals",
+						"USER"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "basic",
+		"basic": [
+			{
+				"key": "password",
+				"value": "SYS",
+				"type": "string"
+			},
+			{
+				"key": "username",
+				"value": "_SYSTEM",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
