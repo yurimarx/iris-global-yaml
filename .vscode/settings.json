@@ -21,7 +21,8 @@
       "namespace": "USER", 
       "username": "_SYSTEM", 
       "password": "SYS" 
-    }
+    },
+    "conf.irisGlobalEditor.filter": ""
 
 
 }

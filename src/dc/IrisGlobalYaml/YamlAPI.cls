@@ -101,13 +101,13 @@ ClassMethod GetGlobalYamlContent(namespace As %String, globalname As %String) As
         While iter.%GetNext(.key, .value) {
             If $FIND(value, "(") > 0 {
                 If wroteSubscripts = 0 {
-                    Write "     subscripts:", !
+                    Write "        subscripts:", !
                     Set wroteSubscripts = 1
                 }
-                Write "        - ", value, ": ", $GET(@value), !
+                Write "            - ", value, ": ", $GET(@value), !
             } Else {
-                Write " ", value, ": ", !
-                Write "     value: ", $GET(@value), !
+                Write "    ", value, ": ", !
+                Write "        value: ", $GET(@value), !
             }
         }
     }
